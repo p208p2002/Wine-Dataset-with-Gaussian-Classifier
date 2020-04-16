@@ -32,17 +32,17 @@ class GaussianClassifier():
             return np.squeeze(numpy_1d_array.reshape(1, -1))
 
     def _count_class_value(self, class_data_xs, class_prior_p, x):
-        test_data = x
+        # 計算每個類別的分數
         transpose_1d = self._transpose_1d
         #
-        test_data = transpose_1d(test_data)
+        x = transpose_1d(x)
         class_data_xs = np.transpose(class_data_xs)
         feature_mean = transpose_1d(np.mean(class_data_xs,axis=1))
 
         #
         cov_m = np.cov(class_data_xs)
         inv_cov_m = np.linalg.inv(cov_m)
-        var = (test_data - feature_mean)
+        var = (x - feature_mean)
         
         # shape: 1*13 -> 13*13 -> 13*1
         res = -1*np.log(class_prior_p) \
