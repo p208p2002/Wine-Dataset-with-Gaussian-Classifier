@@ -82,17 +82,29 @@ class GaussianClassifier():
         class_values = []
         for i in range(self.TOTAL_CLASS):
             class_data_xs, _ = self.class_datas[i]
-            class_value = self._count_class_value(class_data_xs, self.class_prior_ps[0], test_data).tolist()
+            class_value = self._count_class_value(class_data_xs, self.class_prior_ps[0], x).tolist()
             class_values.append(class_value)
-        return class_values
+
+        return np.argmin(class_values)+1,class_values
 
 if __name__ == "__main__":
     data_x,data_y = load_data('wine.data')
     TOTAL_CLASS = len(list(set(data_y))) #分?類
-    x_train, x_test, y_train, y_test = train_test_split(data_x, data_y, test_size=0.5, random_state=1)
+    x_train, x_test, y_train, y_test = train_test_split(data_x, data_y, test_size=0.5, random_state=0)
     
     gc = GaussianClassifier()
     gc.fit(TOTAL_CLASS, x_train, y_train)
-    test_data = np.array([12.08,1.33,2.3,23.6,70,2.2,1.59,.42,1.38,1.74,1.07,3.21,625],dtype=np.float32)
-    res = gc.predict(test_data)
-    print(res)
+    
+    TOTAL_TEST = len(x_test)
+    correct = 0
+    for x,y in zip(x_test,y_test):
+        predict_class,class_values = gc.predict(x)
+        predict_class = float(predict_class)
+        if(y == predict_class):
+            correct += 1
+    print('acc:%f'%(correct/TOTAL_TEST))
+
+    # test_data = np.array([12.08,1.33,2.3,23.6,70,2.2,1.59,.42,1.38,1.74,1.07,3.21,625],dtype=np.float32)
+    # predict_class,class_values = gc.predict(test_data)
+    # print(predict_class)
+    # print(class_values)
