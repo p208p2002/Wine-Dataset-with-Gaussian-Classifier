@@ -6,6 +6,7 @@ logging.basicConfig(level=logging.INFO,format=FORMAT)
 print = logging.info
 
 def load_data(file_path):
+    data = None
     with open(file_path,'r',encoding='utf-8') as f:
         data = f.read()
     data = data.split('\n')
@@ -95,16 +96,3 @@ if __name__ == "__main__":
     test_data = np.array([12.08,1.33,2.3,23.6,70,2.2,1.59,.42,1.38,1.74,1.07,3.21,625],dtype=np.float32)
     res = gc.predict(test_data)
     print(res)
-        
-
-    # # gaussianNB
-    # class_data_xs, _ = class_datas[0]
-    # print(gaussianNB(class_data_xs, class_prior_ps[0], test_data))
-
-    # class_data_xs, _ = class_datas[1]
-    # print(gaussianNB(class_data_xs, class_prior_ps[1], test_data))
-
-    # class_data_xs, _ = class_datas[2]
-    # print(gaussianNB(class_data_xs, class_prior_ps[2], test_data))
-    # # print('res',res)
-
