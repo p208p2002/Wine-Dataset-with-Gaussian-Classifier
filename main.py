@@ -4,6 +4,18 @@ import logging
 FORMAT = 'line:%(lineno)d\t%(message)s'
 logging.basicConfig(level=logging.INFO,format=FORMAT)
 print = logging.info
+
+# class GaussianClassifier():
+#     def __init__(self):
+#         pass
+    
+#     def fit(self,class_data_x, cl):
+#         pass
+    
+#     def predict(self):
+#         pass
+    
+
 def get_class(class_num,data_x,data_y):
     class_num = float(class_num+1)
     spec_class_x = []
@@ -73,7 +85,7 @@ if __name__ == "__main__":
     class_prior_ps = np.array(class_prior_ps)
     
         
-    test_data = np.array([14.1,2.16,2.3,18,105,2.95,3.32,.22,2.38,5.75,1.25,3.17,1510],dtype=np.float32)
+    test_data = np.array([12.08,1.33,2.3,23.6,70,2.2,1.59,.42,1.38,1.74,1.07,3.21,625],dtype=np.float32)
 
     # gaussianNB
     class_data_xs, _ = class_datas[0]
