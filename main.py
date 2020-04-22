@@ -22,7 +22,8 @@ def load_data(file_path):
 
 class GaussianClassifier():
     def __init__(self):
-        pass
+        self.cov_ms = []
+        self.feature_means = []
 
     def _transpose_1d(self, numpy_1d_array):
         # [1,2,3] -> [[1],[2],[3]]
@@ -49,7 +50,7 @@ class GaussianClassifier():
         res = -1*np.log(class_prior_p) \
             +0.5*(transpose_1d(var).dot(inv_cov_m).dot(var)) \
             + 0.5*np.log(np.linalg.det(cov_m))
-        return np.squeeze(res)
+        return np.squeeze(res),cov_m,feature_mean
 
     def _get_class(self,class_num,data_x,data_y):
         class_num = float(class_num+1)
@@ -80,9 +81,14 @@ class GaussianClassifier():
     
     def predict(self,x):
         class_values = []
+        self.cov_ms = []
+        self.feature_means = []
         for i in range(self.TOTAL_CLASS):
             class_data_xs, _ = self.class_datas[i]
-            class_value = self._count_class_value(class_data_xs, self.class_prior_ps[0], x).tolist()
+            class_value, cov_m, feature_mean = self._count_class_value(class_data_xs, self.class_prior_ps[0], x)
+            class_value = class_value.tolist()
+            self.cov_ms.append(cov_m)
+            self.feature_means.append(feature_mean)
             class_values.append(class_value)
 
         return np.argmin(class_values)+1,class_values
@@ -103,6 +109,9 @@ if __name__ == "__main__":
         if(y == predict_class):
             correct += 1
     print('acc:%f'%(correct/TOTAL_TEST))
+
+    print(gc.cov_ms)
+    print(gc.feature_means)
 
     # test_data = np.array([12.08,1.33,2.3,23.6,70,2.2,1.59,.42,1.38,1.74,1.07,3.21,625],dtype=np.float32)
     # predict_class,class_values = gc.predict(test_data)
