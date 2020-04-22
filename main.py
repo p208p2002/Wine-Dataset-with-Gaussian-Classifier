@@ -93,6 +93,26 @@ class GaussianClassifier():
 
         return np.argmin(class_values)+1,class_values
 
+class BhattacharyyaBound():
+    def __init__(self,c1_cov_m, c2_cov_m, c1_feature_mean, c2_feature_mean):
+        self.cov_ms = [c1_cov_m, c2_cov_m]
+        self.feature_means = [c1_feature_mean, c2_feature_mean]
+        print(self.cov_ms[0].shape)
+        print(self.feature_means[0].shape)
+    
+    def formula(self):
+        mean_err = self.feature_means[0] - self.feature_means[1]
+        print(mean_err.shape)
+        
+        res = (np.array([1/8]).dot(np.transpose(mean_err)))
+        
+        print(res.shape)
+
+        cov_m_plus = self.cov_ms[0] + self.cov_ms[1]
+        res2 = res.dot(np.linalg.inv(cov_m_plus/2)).dot(mean_err)
+        print(res2.shape)
+        # pass
+
 if __name__ == "__main__":
     data_x,data_y = load_data('wine.data')
     TOTAL_CLASS = len(list(set(data_y))) #分?類
@@ -112,6 +132,8 @@ if __name__ == "__main__":
 
     print(gc.cov_ms)
     print(gc.feature_means)
+    bb = BhattacharyyaBound(gc.cov_ms[0], gc.cov_ms[1], gc.feature_means[0], gc.feature_means[1])
+    bb.formula()
 
     # test_data = np.array([12.08,1.33,2.3,23.6,70,2.2,1.59,.42,1.38,1.74,1.07,3.21,625],dtype=np.float32)
     # predict_class,class_values = gc.predict(test_data)
