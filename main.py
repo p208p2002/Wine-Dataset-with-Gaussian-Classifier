@@ -6,9 +6,10 @@ logging.basicConfig(level=logging.INFO,format=FORMAT)
 print = logging.info
 
 def load_data(file_path):
-    data = None
-    with open(file_path,'r',encoding='utf-8') as f:
-        data = f.read()
+    f = open(file_path,'r',encoding='utf-8')
+    data = f.read()
+    f.close()
+
     data = data.split('\n')
     data = data[:-1]
     data = list(map(lambda d_str:d_str.split(','),data))
@@ -97,23 +98,27 @@ class BhattacharyyaBound():
     def __init__(self,c1_cov_m, c2_cov_m, c1_feature_mean, c2_feature_mean):
         self.cov_ms = [c1_cov_m, c2_cov_m]
         self.feature_means = [c1_feature_mean, c2_feature_mean]
-        print(self.cov_ms[0].shape)
-        print(self.feature_means[0].shape)
+        # print(self.cov_ms[0].shape)
+        # print(self.feature_means[0].shape)
     
-    def formula(self):
+    def compute(self):
+        # part 1
         mean_err = self.feature_means[0] - self.feature_means[1]
-        print(mean_err.shape)
-        
-        res = (np.array([1/8]).dot(np.transpose(mean_err)))
-        
-        print(res.shape)
-
+        _res = (np.array([1/8]).dot(np.transpose(mean_err)))
         cov_m_plus = self.cov_ms[0] + self.cov_ms[1]
-        res2 = res.dot(np.linalg.inv(cov_m_plus/2)).dot(mean_err)
-        print(res2.shape)
-        # pass
+        part1 = _res.dot(np.linalg.inv(cov_m_plus/2)).dot(mean_err)
+        # print(part1.shape)
 
+        # part 2
+        cov_ms_avg_det = np.linalg.det(np.array(self.cov_ms[0]+self.cov_ms[1])/2)
+        cov_ms_det_square_root = np.power(np.linalg.det(self.cov_ms[0]) * np.linalg.det(self.cov_ms[1]),0.5)
+        part2 = 0.5*np.log(cov_ms_avg_det/cov_ms_det_square_root)
+        # print(np.squeeze(part1+part2))
+
+        return np.squeeze(part1+part2)
+        
 if __name__ == "__main__":
+    # GaussianClassifier
     data_x,data_y = load_data('wine.data')
     TOTAL_CLASS = len(list(set(data_y))) #分?類
     x_train, x_test, y_train, y_test = train_test_split(data_x, data_y, test_size=0.5, random_state=0)
@@ -130,12 +135,17 @@ if __name__ == "__main__":
             correct += 1
     print('acc:%f'%(correct/TOTAL_TEST))
 
-    print(gc.cov_ms)
-    print(gc.feature_means)
-    bb = BhattacharyyaBound(gc.cov_ms[0], gc.cov_ms[1], gc.feature_means[0], gc.feature_means[1])
-    bb.formula()
-
     # test_data = np.array([12.08,1.33,2.3,23.6,70,2.2,1.59,.42,1.38,1.74,1.07,3.21,625],dtype=np.float32)
     # predict_class,class_values = gc.predict(test_data)
     # print(predict_class)
     # print(class_values)
+
+    # BhattacharyyaBound
+    bb12 = BhattacharyyaBound(gc.cov_ms[0], gc.cov_ms[1], gc.feature_means[0], gc.feature_means[1]).compute()
+    print('class 1 and class 2: %s'%bb12)
+
+    bb13 = BhattacharyyaBound(gc.cov_ms[0], gc.cov_ms[2], gc.feature_means[0], gc.feature_means[2]).compute()
+    print('class 1 and class 3: %s'%bb13)
+
+    bb23 = BhattacharyyaBound(gc.cov_ms[1], gc.cov_ms[2], gc.feature_means[1], gc.feature_means[2]).compute()
+    print('class 2 and class 3: %s'%bb23)
