@@ -25,6 +25,8 @@ class GaussianClassifier():
     def __init__(self):
         self.cov_ms = []
         self.feature_means = []
+        self.class_prior_ps = []
+        self.class_datas = []
 
     def _transpose_1d(self, numpy_1d_array):
         # [1,2,3] -> [[1],[2],[3]]
@@ -95,11 +97,11 @@ class GaussianClassifier():
         return np.argmin(class_values)+1,class_values
 
 class BhattacharyyaBound():
-    def __init__(self,c1_cov_m, c2_cov_m, c1_feature_mean, c2_feature_mean):
+    def __init__(self,c1_num, c2_num, c1_cov_m, c2_cov_m, c1_feature_mean, c2_feature_mean):
+        self.c1_num = c1_num
+        self.c2_num = c2_num
         self.cov_ms = [c1_cov_m, c2_cov_m]
         self.feature_means = [c1_feature_mean, c2_feature_mean]
-        # print(self.cov_ms[0].shape)
-        # print(self.feature_means[0].shape)
     
     def compute(self):
         # part 1
@@ -114,8 +116,16 @@ class BhattacharyyaBound():
         cov_ms_det_square_root = np.power(np.linalg.det(self.cov_ms[0]) * np.linalg.det(self.cov_ms[1]),0.5)
         part2 = 0.5*np.log(cov_ms_avg_det/cov_ms_det_square_root)
         # print(np.squeeze(part1+part2))
+        mu = np.squeeze(part1+part2)
 
-        return np.squeeze(part1+part2)
+        # pp
+        c1_pp = self.c1_num/(self.c1_num+self.c2_num)
+        c2_pp = 1.0 - c1_pp
+        
+        bb_res = np.power(np.array(c1_pp*c2_pp),0.5)*np.exp(-1*mu)
+        # print(bb_res)
+        # return np.squeeze(part1+part2)
+        return bb_res
         
 if __name__ == "__main__":
     # GaussianClassifier
@@ -141,11 +151,15 @@ if __name__ == "__main__":
     # print(class_values)
 
     # BhattacharyyaBound
-    bb12 = BhattacharyyaBound(gc.cov_ms[0], gc.cov_ms[1], gc.feature_means[0], gc.feature_means[1]).compute()
+    c1_data_num = len(gc.class_datas[0][0])
+    c2_data_num = len(gc.class_datas[1][0])
+    c3_data_num = len(gc.class_datas[2][0])
+    
+    bb12 = BhattacharyyaBound(c1_data_num, c2_data_num, gc.cov_ms[0], gc.cov_ms[1], gc.feature_means[0], gc.feature_means[1]).compute()
     print('class 1 and class 2: %s'%bb12)
 
-    bb13 = BhattacharyyaBound(gc.cov_ms[0], gc.cov_ms[2], gc.feature_means[0], gc.feature_means[2]).compute()
+    bb13 = BhattacharyyaBound(c1_data_num, c3_data_num, gc.cov_ms[0], gc.cov_ms[2], gc.feature_means[0], gc.feature_means[2]).compute()
     print('class 1 and class 3: %s'%bb13)
 
-    bb23 = BhattacharyyaBound(gc.cov_ms[1], gc.cov_ms[2], gc.feature_means[1], gc.feature_means[2]).compute()
+    bb23 = BhattacharyyaBound(c2_data_num, c3_data_num, gc.cov_ms[1], gc.cov_ms[2], gc.feature_means[1], gc.feature_means[2]).compute()
     print('class 2 and class 3: %s'%bb23)
